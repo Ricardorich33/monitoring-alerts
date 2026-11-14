@@ -14,6 +14,7 @@ Prometheus 告警规则示例，覆盖主机、容器和接入层常见异常，
 
 1. 把 `rules.yml` 挂载到 Prometheus 的规则目录。
 2. 容器指标需要 cAdvisor，HTTP 探测需要 blackbox-exporter，按需补充 scrape 配置。
-3. 导入 `grafana/` 下的看板后，把数据源 UID 换成你的 Prometheus。
+3. `alertmanager.yml` 是告警路由示例，默认接入钉钉机器人，替换 token 即可使用。
+4. 把 `grafana/node-exporter-overview.json` 导入 Grafana，导入时选择你的 Prometheus 数据源即可。
 
 > 阈值需要根据业务实际调整，不要把示例值直接用于生产。
