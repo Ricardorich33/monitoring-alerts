@@ -1,0 +1,70 @@
+groups:
+  - name: host
+    rules:
+      - alert: NodeDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "节点 {{ $labels.instance }} 失联"
+
+      - alert: HighCPUUsage
+        expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "节点 {{ $labels.instance }} CPU 使用率过高"
+
+      - alert: HighMemoryUsage
+        expr: (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "节点 {{ $labels.instance }} 内存使用率过高"
+
+      - alert: HighDiskUsage
+        expr: (1 - node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "节点 {{ $labels.instance }} 根分区磁盘使用率过高"
+
+  - name: container
+    rules:
+      - alert: ContainerExited
+        expr: time() - container_last_seen{name!=""} > 60
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "容器 {{ $labels.name }} 已退出或失联"
+
+      - alert: ContainerRestarting
+        expr: changes(container_start_time_seconds{name!=""}[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "容器 {{ $labels.name }} 在 5 分钟内发生过重启"
+
+  - name: http
+    rules:
+      - alert: HttpProbeFailed
+        expr: probe_success == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "HTTP 探测失败: {{ $labels.instance }}"
+
+      - alert: HttpSlow
+        expr: probe_duration_seconds > 3
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "HTTP 响应超过 3 秒: {{ $labels.instance }}"
